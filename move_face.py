@@ -28,11 +28,17 @@ while True:
     if(frame[0] == False):
         print("check device")
         break
-    #gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)  
+    img=frame[1];
+    gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)  
+    #detect face
+    faces=face_case.detectMultiScale(gray,scaleFactor=1.08,minNeighbors=5,minSize=(100,100))
+    for(x,y,w,h) in faces:
+        cv2.rectangle(img,(x,y),(w+x,h+y),(0,255,0),2),
+        
     cv2.namedWindow('img',cv2.WINDOW_NORMAL)
-    cv2.imshow('img',frame[1])
+    cv2.imshow('img',img)
     #stopkey
-    if cv2.waitKey(1) & 0xff == ord('q'):
+    if cv2.waitKey(10) & 0xff == ord('q'):
         break
 
 #解除所有攝影機    
