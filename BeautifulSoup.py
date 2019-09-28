@@ -1,38 +1,49 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep  6 10:24:23 2019
+Created on Sun Sep  8 16:18:36 2019
 
-@author: DarrenSu
+@author: Darren
 """
-#intcude 所需的module
+
 import bs4 
-import urllib.request as res1 
+import requests
 
-#新增url
-html = "https://www.mobile01.com/topiclist.php?f=246"
+uri='https://www.ptt.cc/bbs/movie/index.html'
+html=requests.get(uri);
 
-#加入user-agent
-user= res1.Request(html,headers={"user-agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36"})
+def search_title(soup,research,i):    
+    data=soup.find_all(class_="title");
+    date=soup.find_all('div',class_="date");
+    for j,title in enumerate(data) :
+        if title.find('a'):            
+            a_title = title.a;
+            str_title=title.a.string;
+            if research in str_title:
+                if not(a_title.string.startswith('Re')or a_title.string.startswith('Fw')): 
+                    i=i+1;
+                    print("#{} 時間:{}   名稱:{}\n 網址:{}".format(i,date[j].string,str_title,a_title.get("href")));
+        
+        
 
-#打開網址
-with res1.urlopen(user) as resopn:
-    data=resopn.read().decode("utf-8");
+#check internet
+if html.status_code != requests.codes.ok:
+    print("無法連線");
+else:
+    soup= bs4.BeautifulSoup(html.content,"html.parser");
 
-#使用beautifulsoup分析HTML格式
-root=bs4.BeautifulSoup(data,"html.parser")
-print(root.div.attrs)
-#設定要抓取Html格式中標籤下的檔案
-#print(root.title.string)
 
-#使用find尋找Html中需要的部分
-#find("標籤",篩選條件)
-title=root.find_all("div",class_="c-listTableTd__title") #增加篩選條件
-#print(title.a.string)
-#進行資料篩選,如果title中有A的話才會把資料印出
-with open('mobile.txt','w',encoding = "utf-8") as fopen:
-    for check in title:
-        if check.a != None:
-            fopen.write(check.a.string+"\n")
-            print(check.a.string);
-            
-            
+while True:
+    i=0;
+    try:
+        research="["+str(input("請輸入搜尋的標題 or Q離開:"))
+        if research=="[Q":
+            print("結束搜尋");
+            break      
+        search_title(soup,research,i);  
+    except:
+        print("輸入型態錯誤請重新輸入");
+      
+
+        
+
+                  
