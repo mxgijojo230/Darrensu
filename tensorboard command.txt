@@ -1,0 +1,8 @@
+若圖形出現太多無相關的流程圖,是因為執行過太多程式,需要重新restart kernel後重新產生logs 檔
+
+使用CMD先到包含產生log的程式碼以及logs文件根目錄後執行以下command
+tensorboard --logdir logs
+執行後請勿關閉CMD視窗
+
+開啟google瀏覽器執行以下網址
+http://localhost:6006
