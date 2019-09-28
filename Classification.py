@@ -60,6 +60,8 @@ keep_prob= tf.placeholder(tf.float32)
 
 x_image=tf.reshape(xs,[-1,28,28,1])
 
+
+
 # =============================================================================
 # conv1 layer  
 # =============================================================================
@@ -96,6 +98,12 @@ b_fc2= bias_variable([10])
 prediction= tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+ b_fc2 )
 
 # =============================================================================
+# #save to dile
+# =============================================================================
+#remerber to define the same dtype and shape when restore
+W= tf.Variable(W_fc2,dtype= tf.float32, name='weights')
+b= tf.Variable(b_fc2,dtype= tf.float32, name='biases')
+# =============================================================================
 # #use Cross entropy loss method
 # =============================================================================
 cross_entropy= tf.reduce_mean(-tf.reduce_sum(ys* tf.log(prediction),
@@ -103,23 +111,31 @@ cross_entropy= tf.reduce_mean(-tf.reduce_sum(ys* tf.log(prediction),
 
 train_step=tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
-sess=tf.Session()
-sess.run(tf.global_variables_initializer())   
-for i in range(1000):
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())   
+    for i in range(1000):
+    
+        #include train data from mnist
+        batch_xs,batch_ys= mnist.train.next_batch(100)
+        sess.run(train_step,feed_dict={xs:batch_xs,ys:batch_ys, keep_prob: 0.5})
+    
+    #   Learning efficiency
+        if i %50==0:
+            print("Train round :",i)
+    #        print(compute_accuracy(
+    #            mnist.test.images[:1000], mnist.test.labels[:1000]))
+    #Save data to CNN_net/save_net.ckpt
+    if i== 999:
+        saver= tf.train.Saver()
+        save_path= saver.save(sess, "CNN_net/save_net.ckpt")
+        print("save to path:",save_path)
 
-    #include train data from mnist
-    batch_xs,batch_ys= mnist.train.next_batch(100)
-    sess.run(train_step,feed_dict={xs:batch_xs,ys:batch_ys, keep_prob: 0.5})
+        print("Train complete")
 
-#   Learning efficiency
-    if i %50==0:
-        print("Train round :",i)
-#        print(compute_accuracy(
-#            mnist.test.images[:1000], mnist.test.labels[:1000]))
-print("Train complete")
-while True:
-    leave=input('Enter "q" to leave =')
-    if leave=='q':
-        break
-    #include test data 
-    print(compute_accuracy(mnist.test.images[:1000], mnist.test.labels[:1000]))
+
+        while True:
+            leave=input('Enter "q" to leave =')
+            if leave=='q':
+                break
+            #include test data 
+            print(compute_accuracy(mnist.test.images[:1000], mnist.test.labels[:1000]))
